@@ -1,4 +1,3 @@
-
 from flask import Flask, render_template, request, session, redirect, url_for
 from flask_socketio import join_room, leave_room, send, SocketIO
 import random
@@ -55,7 +54,7 @@ def room():
     if room is None or session.get("name") is None or room not in rooms:
         return redirect(url_for("home"))
 
-    return render_template("room.html", code=room, messages=rooms[room]["messages"])
+    return render_template("room.html", code=room, messages=rooms[room]["messages"], session_name=session.get("name"))
 
 @socketio.on("message")
 def message(data):

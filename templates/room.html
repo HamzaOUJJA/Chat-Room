@@ -1,4 +1,5 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %} 
+{% block content %}
 <div class="message-box">
   <h2>Chat Room: {{code}}</h2>
   <div class="messages" id="messages"></div>
@@ -16,37 +17,43 @@
   </div>
 </div>
 <script type="text/javascript">
-  var socketio = io();
-
-  const messages = document.getElementById("messages");
-
-  const createMessage = (name, msg) => {
-    const content = `
-    <div class="text">
-        <span>
-            <strong>${name}</strong>: ${msg}
-        </span>
-        <span class="muted">
-            ${new Date().toLocaleString()}
-        </span>
-    </div>
-    `;
-    messages.innerHTML += content;
-  };
-
-  socketio.on("message", (data) => {
-    createMessage(data.name, data.message);
-  });
-
-  const sendMessage = () => {
-    const message = document.getElementById("message");
-    if (message.value == "") return;
-    socketio.emit("message", { data: message.value });
-    message.value = "";
-  };
-</script>
+    var socketio = io();
+    const sessionName = "{{ session_name }}";  
+    const messages = document.getElementById("messages");
+  
+    const createMessage = (name, msg, type) => {
+        const messageClass = type === "sent" ? "sent" : "received";
+        const content = `
+        <div class="text ${messageClass}">
+            <span>
+                <strong>${name}</strong>: ${msg}
+            </span>
+            <span class="muted">
+                ${new Date().toLocaleString()}
+            </span>
+        </div>
+        `;
+        messages.innerHTML += content;
+        messages.scrollTop = messages.scrollHeight; // Auto-scroll to the latest message
+    };
+  
+    socketio.on("message", (data) => {
+        const messageType = data.name === sessionName ? "sent" : "received";
+        createMessage(data.name, data.message, messageType);
+    });
+  
+    const sendMessage = () => {
+        const message = document.getElementById("message");
+        if (message.value == "") return;
+        socketio.emit("message", { data: message.value });
+        message.value = ""; // Clear the input field
+    };
+  </script>
+  
 {% for msg in messages %}
 <script type="text/javascript">
-  createMessage("{{msg.name}}", "{{msg.message}}");
+  const messageType = "{{msg.name}}" === sessionName ? "sent" : "received";
+  createMessage("{{msg.name}}", "{{msg.message}}", messageType);
 </script>
-{% endfor %} {% endblock %}
+{% endfor %} 
+{% endblock %}
