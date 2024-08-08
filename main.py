@@ -8,7 +8,7 @@ app.config["SECRET_KEY"] = "hjhjsdahhds"
 socketio = SocketIO(app)
 
 rooms = {}
-
+  
 def generate_unique_code(length=4):
     """Generate a unique room code."""
     while True:
@@ -96,4 +96,4 @@ def handle_disconnect():
     print(f"{name} has left the room {room_code}")
 
 if __name__ == "__main__":
-    socketio.run(app, debug=True)
+    socketio.run(app, debug=False)
