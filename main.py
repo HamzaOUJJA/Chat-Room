@@ -1,3 +1,7 @@
+import os
+import eventlet
+eventlet.monkey_patch()
+
 from flask import Flask, render_template, request, session, redirect, url_for
 from flask_socketio import SocketIO, join_room, leave_room, send
 import random
@@ -5,13 +9,11 @@ import string
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "hjhjsdahhds"
-socketio = SocketIO(app)
-
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 rooms = {}
-  
+
 def generate_unique_code(length=4):
-    """Generate a unique room code."""
     while True:
         code = ''.join(random.choices(string.ascii_lowercase, k=length))
         if code not in rooms:
@@ -19,7 +21,6 @@ def generate_unique_code(length=4):
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-    """Render the home page and handle room creation or joining."""
     session.clear()
 
     if request.method == "POST":
@@ -48,7 +49,6 @@ def home():
 
 @app.route("/room")
 def room():
-    """Render the room page if the user is in a valid room."""
     room_code = session.get("room")
     name = session.get("name")
 
@@ -60,7 +60,6 @@ def room():
 
 @socketio.on("message")
 def handle_message(data):
-    """Handle incoming messages and broadcast them to the room."""
     room_code = session.get("room")
 
     if room_code and room_code in rooms:
@@ -71,7 +70,6 @@ def handle_message(data):
 
 @socketio.on("connect")
 def handle_connect(auth):
-    """Handle a new user connecting to the room."""
     room_code = session.get("room")
     name = session.get("name")
 
@@ -83,7 +81,6 @@ def handle_connect(auth):
 
 @socketio.on("disconnect")
 def handle_disconnect():
-    """Handle a user disconnecting from the room."""
     room_code = session.get("room")
     name = session.get("name")
 
@@ -97,4 +94,4 @@ def handle_disconnect():
     print(f"{name} has left the room {room_code}")
 
 if __name__ == "__main__":
-    socketio.run(app)
+    socketio.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
