@@ -8,7 +8,7 @@ import random
 import string
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "hjhjsdahhds"
+app.config["SECRET_KEY"] = "HamzaOUJJA"
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 rooms = {}
